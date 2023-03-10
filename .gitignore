@@ -1,0 +1,15 @@
+.idea/
+/draft.py
+/.env
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+/celerybeat-schedule
+/onlineshop/
+/media/
+__pycache__/
+/templates/
