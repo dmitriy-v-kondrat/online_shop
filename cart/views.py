@@ -70,7 +70,6 @@ class PaymentView(mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = Buyers.objects.all()
     serializer_class = PaymentSerializer
 
-    @profile
     def post(self, request, *args, **kwargs):
         serializer = PaymentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -91,7 +90,7 @@ class RedirectToPayView(APIView):
 
 
 class PaymentDetailAPI(APIView):
-    @profile
+    @profile(precision=4)
     def get(self, request, *args, **kwargs):
         dict_response = {'succeeded': Response(data='An email has been sent to you with purchase details',
                                                status=status.HTTP_201_CREATED),

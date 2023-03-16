@@ -37,7 +37,6 @@ class ForBuyersBase:
 
 
 class DataForPayment(ForBuyersBase):
-
     def pay_product(self, buyer: Dict) -> Dict:
         payments = self.create_payment(buyer)
         checkout_data = {"buyer": buyer,
@@ -50,7 +49,7 @@ class DataForPayment(ForBuyersBase):
         purchase_detail = {}
         for product in self.get_products(keys=self.cart.cart.keys()):
             if product.quantity >= self.cart.cart[str(product.id)]['quantity']:
-                purchase_detail[str(product.id)] = int(self.cart.cart[str(product.id)]['quantity'])
+                purchase_detail[str(product.id)] = f"{product.name}, {self.cart.cart[str(product.id)]['quantity']}"
             else:
                 raise ValidationError(detail=f"{product.name} left {product.quantity} pieces.")
         return purchase_detail
@@ -92,7 +91,7 @@ class DataForPayment(ForBuyersBase):
 
 
 class AddToBuyers(ForBuyersBase):
-    @profile
+    @profile(precision=4)
     def write_product_for(self, payment) -> Tuple:
         product_name = ''
         product_id = ''
@@ -101,7 +100,7 @@ class AddToBuyers(ForBuyersBase):
         self.cart_detail()
         Product.objects.bulk_update(
                 [Product(id=int(pk),
-                         quantity=F('quantity') + int((payment.metadata[str(pk)])))
+                         quantity=F('quantity') - int(payment.metadata[str(pk)].split(', ')[1]))
                  for pk in payment.metadata.keys()
                  ], ['quantity'])
         for pk in payment.metadata.keys():
@@ -115,6 +114,7 @@ class AddToBuyers(ForBuyersBase):
         dict_data_for_csv = {'product_name': product_name, 'product_id': product_id, 'product_pieces': product_pieces}
         return dict_data_for_csv, sales
 
+    @profile(precision=4)
     def add_buyer_data(self, payment) -> bool:
         total_price = payment.amount.value
         payment_id = payment.id
@@ -143,20 +143,16 @@ class AddToBuyers(ForBuyersBase):
 
         return True
 
-    @profile
+    @profile(precision=4)
     def read_data_payment_pending(self) -> Dict:
-        buyer = BuyerPaymentPending.objects.filter(payment_id=self.data_payment().id).values('payment_id',
-                                                                                             'created_at',
-                                                                                             'payment_status',
-                                                                                             'first_name',
-                                                                                             'last_name',
-                                                                                             'email',
-                                                                                             'phone',
-                                                                                             'orders_pending',
-                                                                                             'postal_code',
-                                                                                             'country',
-                                                                                             'state',
-                                                                                             'locality',
-                                                                                             'receive_newsletter')
-        dict_data_payment = buyer[0] #???
-        return dict_data_payment
+        buyer = BuyerPaymentPending.objects\
+            .filter(payment_id=self.data_payment().id)\
+            .values('payment_id', 'created_at',
+                    'payment_status', 'first_name',
+                    'last_name', 'email',
+                    'phone', 'orders_pending',
+                    'postal_code', 'country',
+                    'state', 'locality',
+                    'receive_newsletter'
+                    )
+        return buyer[0]

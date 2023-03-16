@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from users.models import Buyers
-from users.services import purchases_product
+from users.services import get_purchase_delivery
 
 
 # Register your models here.
@@ -9,18 +9,15 @@ from users.services import purchases_product
 
 class BuyersAdmin(admin.ModelAdmin):
     model = Buyers
-    fields = ('first_name', 'last_name', 'email', 'phone', 'country', 'get_purchase', 'get_address')
-    readonly_fields = ('first_name', 'last_name', 'email', 'phone', 'country', 'get_purchase', 'get_address')
+    fields = ('email', 'get_purchase_delivery', 'get_address')
+    readonly_fields = ('email', 'get_purchase_delivery', 'get_address')
 
-    def get_purchase(self, obj):
-        return purchases_product(obj.purchases)
+    def get_purchase_delivery(self, obj):
+        return get_purchase_delivery(obj.purchases)
 
     def get_address(self, obj):
-        get_address = f"Postal code: {obj.address['postal_code']}\n" \
-                     f"Country: {obj.address['country']}\n" \
-                     f"State: {obj.address['state']}\n" \
-                     f"Locality: {obj.address['locality']}"
-        return get_address
+        # print(obj.delivery_data)
+        return obj.delivery_data
 
 
 

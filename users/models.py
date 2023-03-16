@@ -57,15 +57,9 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 
 
 class Buyers(models.Model):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=100)
     email = models.EmailField()
-    phone = PhoneNumberField()
     purchases = models.JSONField(default=dict)
-    postal_code = models.CharField(max_length=9)
-    country = models.CharField(max_length=50)
-    state = models.CharField(max_length=128)
-    locality = models.TextField(help_text='town, street, house, etc')
+    delivery_data = models.JSONField(default=dict, verbose_name='phone, name, address')
 
     def __str__(self):
         return self.email
@@ -88,3 +82,4 @@ class BuyerPaymentPending(models.Model):
 
     def __str__(self):
         return self.payment_id
+
