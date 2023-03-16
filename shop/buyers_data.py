@@ -91,7 +91,6 @@ class DataForPayment(ForBuyersBase):
 
 
 class AddToBuyers(ForBuyersBase):
-    @profile(precision=4)
     def write_product_for(self, payment) -> Tuple:
         product_name = ''
         product_id = ''
@@ -114,7 +113,6 @@ class AddToBuyers(ForBuyersBase):
         dict_data_for_csv = {'product_name': product_name, 'product_id': product_id, 'product_pieces': product_pieces}
         return dict_data_for_csv, sales
 
-    @profile(precision=4)
     def add_buyer_data(self, payment) -> bool:
         total_price = payment.amount.value
         payment_id = payment.id
@@ -143,7 +141,6 @@ class AddToBuyers(ForBuyersBase):
 
         return True
 
-    @profile(precision=4)
     def read_data_payment_pending(self) -> Dict:
         buyer = BuyerPaymentPending.objects\
             .filter(payment_id=self.data_payment().id)\

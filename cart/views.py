@@ -90,7 +90,6 @@ class RedirectToPayView(APIView):
 
 
 class PaymentDetailAPI(APIView):
-    @profile(precision=4)
     def get(self, request, *args, **kwargs):
         dict_response = {'succeeded': Response(data='An email has been sent to you with purchase details',
                                                status=status.HTTP_201_CREATED),
