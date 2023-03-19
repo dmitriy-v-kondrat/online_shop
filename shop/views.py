@@ -14,7 +14,7 @@ from shop.services import add_cart
 
 
 class ProductListView(generics.ListAPIView):
-    queryset = Product.objects.select_related('category')
+    queryset = Product.objects.select_related('category').prefetch_related('images')
     serializer_class = ProductListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProductFilter

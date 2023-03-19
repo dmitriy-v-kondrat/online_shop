@@ -37,7 +37,7 @@ class Product(models.Model):
     views = models.IntegerField(default=0)
 
     def __str__(self):
-        return str(self.name)
+        return self.name
 
     def get_absolute_url(self):
         return reverse('detail_product', kwargs={'slug': self.slug})
@@ -56,7 +56,7 @@ class ImagesProduct(models.Model):
     image = models.ImageField(upload_to=path_to_images)
 
     def __str__(self):
-        return str(self.product)
+        return self.image
 
     class Meta:
         verbose_name_plural = 'images'

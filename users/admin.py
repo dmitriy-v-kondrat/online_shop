@@ -9,11 +9,13 @@ from users.services import purchases_and_delivery
 
 class BuyersAdmin(admin.ModelAdmin):
     model = Buyers
-    fields = ('email', 'get_purchases_and_delivery')
-    readonly_fields = ('email', 'get_purchases_and_delivery')
+    fields = ('email', 'purchases_and_delivery')
+    readonly_fields = ('email', 'purchases_and_delivery')
 
-    def get_purchases_and_delivery(self, obj):
+    def purchases_and_delivery(self, obj):
         return purchases_and_delivery(obj)
+
+    show_full_result_count = False
 
 
 admin.site.register(Buyers, BuyersAdmin)

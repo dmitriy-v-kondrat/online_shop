@@ -1,4 +1,4 @@
-from django.db.models import F
+
 from django.shortcuts import redirect
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
@@ -8,16 +8,12 @@ from rest_framework.views import APIView
 from cart.cart import Cart
 from cart.serializers import CartUpdateQuantitySerializer, PaymentSerializer
 from cart.services import data_for_buyers, data_payment_pending, payment_detail
-from shop.buyers_data import ForBuyersBase
-from shop.models import Product
 from shop.services import update_quantity_cart
 from users.models import Buyers
 
-from memory_profiler import profile
 
 
 class CartDetailAPI(APIView):
-
     def get(self, request):
         cart = Cart(request)
 

@@ -23,8 +23,14 @@ class ImagesProductInline(admin.TabularInline):
     get_photo.short_description = 'Превью'
 
 
+class ImagesProductAdmin(admin.ModelAdmin):
+    model = ImagesProduct
+    show_full_result_count = False
+
+
 class CategoryAdmin(DraggableMPTTAdmin):
     prepopulated_fields = {'slug': ('name',)}
+    show_full_result_count = False
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -41,8 +47,10 @@ class ProductAdmin(admin.ModelAdmin):
             obj.new_price = new_price(obj.price, obj.discount)
         obj.save()
 
+    show_full_result_count = False
 
-admin.site.register(ImagesProduct, )
+
+admin.site.register(ImagesProduct, ImagesProductAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(
         Category,

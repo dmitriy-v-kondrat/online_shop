@@ -1,8 +1,9 @@
-
-
+from memory_profiler import profile
 from rest_framework import serializers
 
 from shop.models import ImagesProduct, Product
+
+
 # from shop.services import representation
 
 
@@ -34,11 +35,11 @@ class ProductListSerializer(serializers.ModelSerializer):
             rep.pop('price')
         return rep
 
-
     def get_images(self, obj):
         request = self.context.get('request')
-        images = obj.images.all().first().image
-        return request.build_absolute_uri(images.url)
+        if obj.images.all().exists():
+            images = obj.images.first().image
+            return request.build_absolute_uri(images.url)
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
