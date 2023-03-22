@@ -16,7 +16,6 @@ from users.models import Buyers
 class CartDetailAPI(APIView):
     def get(self, request):
         cart = Cart(request)
-
         return Response(data={'product': cart,
                               'total price': cart.get_total_price(),
                               }

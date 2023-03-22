@@ -18,16 +18,16 @@ Configuration.account_id = settings.CONFIGURATION_PAY['payment_account']
 Configuration.secret_key = settings.CONFIGURATION_PAY['payment_key']
 
 
-class ForBuyersBase:
+class ForBuyersBase(object):
 
     def __init__(self, request):
         self.session = request.session
         self.cart = Cart(request)
-        self.payment = Payment()
+        # self.payment = Payment()
         self.products = Product()
 
     def data_payment(self):
-        return self.payment.find_one(self.session.get('payment_id'))
+        return Payment.find_one(self.session.get('payment_id'))
 
     def get_products(self, keys):
         return Product.objects.filter(id__in=keys).only('id', 'name', 'quantity')
@@ -37,26 +37,23 @@ class ForBuyersBase:
 
 
 class DataForPayment(ForBuyersBase):
-    def pay_product(self, buyer: Dict) -> Dict:
-        payments = self.create_payment(buyer)
-        checkout_data = {"buyer": buyer,
+
+    def __init__(self, request, buyer):
+
+        super().__init__(request)
+        self.buyer = buyer
+
+    def pay_product(self) -> Dict:
+        payments = self.create_payment()
+        checkout_data = {"buyer": self.buyer,
                          "cart": self.cart_detail(),
                          "payment_value": payments.amount.value,
                          }
         return checkout_data
 
-    def check_product(self) -> Dict:
-        purchase_detail = {}
-        for product in self.get_products(keys=self.cart.cart.keys()):
-            if product.quantity >= self.cart.cart[str(product.id)]['quantity']:
-                purchase_detail[str(product.id)] = f"{product.name}, {self.cart.cart[str(product.id)]['quantity']}"
-            else:
-                raise ValidationError(detail=f"{product.name} left {product.quantity} pieces.")
-        return purchase_detail
-
-    def create_payment(self, buyer: Dict) -> TypeVar:
+    def create_payment(self) -> TypeVar:
         purchase_detail = self.check_product()
-        payments = self.payment.create({
+        to_payment = Payment.create({
             "amount": {
                 "value": self.cart.get_total_price(),
                 "currency": "RUB"
@@ -67,17 +64,31 @@ class DataForPayment(ForBuyersBase):
                 },
             "metadata": purchase_detail,
             "capture": True,
-            "description": f"{buyer['email']}, {buyer['first_name']}, {buyer['last_name']}",
+            "description": f"{self.buyer['email']}, {self.buyer['first_name']}, {self.buyer['last_name']}",
 
             }, uuid.uuid4())
-        self.update_session(payments, buyer)
-        return payments
+        self.update_session(to_payment)
+        return to_payment
 
-    def update_session(self, payments: TypeVar, buyer: Dict) -> None:
+    def check_product(self) -> Dict:
+        purchase_detail = {}
+        for product in self.get_products(keys=self.cart.cart.keys()):
+            if product.quantity >= self.cart.cart[str(product.id)]['quantity']:
+                purchase_detail[str(product.id)] = f"{product.name}, {self.cart.cart[str(product.id)]['quantity']}"
+            else:
+                raise ValidationError(detail=f"{product.name} left {product.quantity} pieces.")
+        return purchase_detail
+
+    def update_session(self, payments: TypeVar) -> None:
         self.session.update({'payment_id': payments.id,
-                             'buyer': buyer,
+                             'buyer': self.buyer,
                              'to_pay': payments.confirmation.confirmation_url
                              })
+
+
+
+
+class AddToBuyerPaymentPending(ForBuyersBase):
 
     def data_for_buyer_payment_pending(self) -> None:
         data_for_payment = self.data_payment()
@@ -91,37 +102,32 @@ class DataForPayment(ForBuyersBase):
 
 
 class AddToBuyers(ForBuyersBase):
-    def write_product_for(self, payment) -> Tuple:
-        product_name = ''
-        product_id = ''
-        product_pieces = ''
-        sales = []
-        self.cart_detail()
-        Product.objects.bulk_update(
-                [Product(id=int(pk),
-                         quantity=F('quantity') - int(payment.metadata[str(pk)].split(', ')[1]))
-                 for pk in payment.metadata.keys()
-                 ], ['quantity'])
-        for pk in payment.metadata.keys():
-            product_name += self.cart.cart[pk]['product'] + '\n\n'
-            product_pieces += str(self.cart.cart[pk]['quantity']) + '\n\n'
-            product_id += str(pk) + '\n\n'
-            sales.append({"Product": self.cart.cart[pk]['product'],
-                          "pieces": str(self.cart.cart[pk]['quantity'])
-                          }
-                         )
-        dict_data_for_csv = {'product_name': product_name, 'product_id': product_id, 'product_pieces': product_pieces}
-        return dict_data_for_csv, sales
 
-    def add_buyer_data(self, payment) -> bool:
-        total_price = payment.amount.value
-        payment_id = payment.id
-        write_product = self.write_product_for(payment=payment)
+    def __init__(self, request):
+
+        super().__init__(request)
+        self.payment = self.data_payment()
+
+    def check_payment(self):
+        if self.session.get('payment_id'):
+            if self.payment.status == 'succeeded':
+                if self.add_buyer_data() is True:
+                    self.session.flush()
+                    return 'succeeded'
+            else:
+                return 'not succeeded'
+        else:
+            return 'fail'
+
+    def add_buyer_data(self) -> bool:
+        total_price = self.payment.amount.value
+        payment_id = self.payment.id
+        write_product = self.write_product_for()
 
         dict_data_payment = self.read_data_payment_pending()
         newsletter_status = dict_data_payment.pop('receive_newsletter')
-        dict_data_payment['captured_at'] = self.data_payment().captured_at
-        dict_data_payment['payment_status'] = self.data_payment().status
+        dict_data_payment['captured_at'] = self.payment.captured_at
+        dict_data_payment['payment_status'] = self.payment.status
 
         if newsletter_status is True:
             data_payment_for_model = dict_data_payment.copy()
@@ -140,6 +146,30 @@ class AddToBuyers(ForBuyersBase):
                 ).apply_async()
 
         return True
+
+    def write_product_for(self) -> Tuple:
+        product_name = ''
+        product_id = ''
+        product_pieces = ''
+        sales = []
+        self.cart_detail()
+        Product.objects.bulk_update(  # move in the Celery or another function?
+                [Product(id=int(pk),
+                         quantity=F('quantity') - int(self.payment.metadata[str(pk)].split(', ')[1]))
+                 for pk in self.payment.metadata.keys()
+                 ], ['quantity'])
+        for pk in self.payment.metadata.keys():
+            product_name += self.cart.cart[pk]['product'] + '\n\n'
+            product_pieces += str(self.cart.cart[pk]['quantity']) + '\n\n'
+            product_id += str(pk) + '\n\n'
+            sales.append({"Product": self.cart.cart[pk]['product'],
+                          "pieces": str(self.cart.cart[pk]['quantity'])
+                          }
+                         )
+        dict_data_for_csv = {'product_name': product_name, 'product_id': product_id, 'product_pieces': product_pieces}
+        return dict_data_for_csv, sales
+
+
 
     def read_data_payment_pending(self) -> Dict:
         buyer = BuyerPaymentPending.objects\
