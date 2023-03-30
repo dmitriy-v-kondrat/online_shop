@@ -1,3 +1,4 @@
+""" app.cart views. """
 
 from django.shortcuts import redirect
 from rest_framework import generics, mixins, status
@@ -6,14 +7,13 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from cart.cart import Cart
-from cart.serializers import CartUpdateQuantitySerializer, PaymentSerializer
-from cart.services import data_for_buyers, data_payment_pending, payment_detail
-from shop.services import update_quantity_cart
+from cart.serializers import PaymentSerializer, QuantitySerializer
+from cart.services import data_for_buyers, data_payment_pending, payment_detail, update_quantity_cart
 from users.models import Buyers
 
 
-
 class CartDetailAPI(APIView):
+    """ Products in a cart. """
     def get(self, request):
         cart = Cart(request)
         return Response(data={'product': cart,
@@ -23,13 +23,13 @@ class CartDetailAPI(APIView):
 
 
 class CartUpdateQuantityView(generics.UpdateAPIView):
-    serializer_class = CartUpdateQuantitySerializer
+    """ Update product quantity. """
+    serializer_class = QuantitySerializer
 
     def update(self, request, *args, **kwargs):
-        serializer = CartUpdateQuantitySerializer(data=request.data)
+        serializer = QuantitySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        cart = Cart(request)
-        update_quantity_cart(cart=cart,
+        update_quantity_cart(request,
                              product_id=str(kwargs['pk']),
                              quantity=int(serializer.validated_data['quantity'])
                              )
@@ -39,7 +39,9 @@ class CartUpdateQuantityView(generics.UpdateAPIView):
             }
         return dict_response[request.session.modified]
 
+
 class CartDestroyProductView(APIView):
+    """ Remove product from a cart. """
     def delete(self, request, pk):
         cart = Cart(request)
         cart.remove(pk=pk)
@@ -51,6 +53,7 @@ class CartDestroyProductView(APIView):
 
 
 class ClearCartView(APIView):
+    """ Clear cart. """
     def delete(self, request):
         cart = Cart(request)
         cart.clear()
@@ -62,6 +65,7 @@ class ClearCartView(APIView):
 
 
 class PaymentView(mixins.CreateModelMixin, generics.GenericAPIView):
+    """ Takes buyer data for pay. """
     queryset = Buyers.objects.all()
     serializer_class = PaymentSerializer
 
@@ -75,16 +79,16 @@ class PaymentView(mixins.CreateModelMixin, generics.GenericAPIView):
                         )
 
 
-
 class RedirectToPayView(APIView):
+    """ Sends for writing in db data buyer, products and payment. Redirect buyer on payment page."""
 
     def get(self, request, *args, **kwargs):
         data_payment_pending(request)
         return redirect(request.session['to_pay'])
 
 
-
 class PaymentDetailAPI(APIView):
+    """ Payment status. """
     def get(self, request, *args, **kwargs):
         dict_response = {'succeeded': Response(data='An email has been sent to you with purchase details',
                                                status=status.HTTP_201_CREATED),

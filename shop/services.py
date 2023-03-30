@@ -1,22 +1,23 @@
+""" app.shop services. """
+
 from decimal import Decimal
+
+from cart.cart import Cart
 
 
 def new_price(price: int, discount: int) -> Decimal:
-    """
-
-    :param price:
-    :param discount:
-    :return:
-    """
+    """ Calculates the value for 'new_price' field. """
     return price * (1 - Decimal(discount) / 100)
 
 
-def _quantity_product(product_quantity: int, quantity: int) -> bool:
-    if 0 < product_quantity >= quantity:
-        return True
+# def _quantity_product(product_quantity: int, quantity: int) -> bool:
+#     if 0 < product_quantity >= quantity:
+#         return True
 
 
-def add_cart(cart, product, quantity):
+def add_cart(request, product, quantity):
+    """ Add to cart. """
+    cart = Cart(request)
     if 0 < product.quantity >= quantity:
         product_id = str(product.id)
         if product.new_price is None:
@@ -32,11 +33,3 @@ def add_cart(cart, product, quantity):
             return 'not found'
         elif product.quantity < quantity:
             return 'many quantity'
-
-
-def update_quantity_cart(cart, product_id, quantity):
-    if quantity > 0:
-        cart.update_quantity(product_id=product_id,
-                             quantity=quantity
-                             )
-

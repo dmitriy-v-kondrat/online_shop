@@ -36,7 +36,7 @@ class ProfileManager(BaseUserManager):
 
 
 class Profile(AbstractBaseUser, PermissionsMixin):
-    """Model users."""
+    """ Temporarily not connected """
     username = None
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=100)
@@ -57,6 +57,7 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 
 
 class Buyers(models.Model):
+    """ Model creating after succeeded pay. """
     email = models.EmailField()
     purchases = models.JSONField(default=dict)
     delivery_data = models.JSONField(default=dict, verbose_name='phone, name, address')
@@ -66,6 +67,7 @@ class Buyers(models.Model):
 
 
 class BuyerPaymentPending(models.Model):
+    """ Model creating after a redirect on payment page. """
     payment_id = models.CharField(max_length=36, db_index=True)
     created_at = models.DateTimeField()
     payment_status = models.CharField(max_length=20, blank=True, null=True)

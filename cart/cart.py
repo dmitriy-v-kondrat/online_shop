@@ -1,14 +1,13 @@
+""" Cart. """
 from decimal import Decimal
 from django.conf import settings
 from shop.models import Product
 
 
 class Cart(object):
+    """ Cart on the sessions."""
 
     def __init__(self, request):
-        """
-        Инициализируем корзину
-        """
         self.session = request.session
         cart = self.session.get(settings.CART_SESSION_ID)
         if not cart:
@@ -17,9 +16,7 @@ class Cart(object):
         self.cart = cart
 
     def add(self, product_id, price, quantity):
-        """
-        Добавить продукт в корзину или обновить его количество.
-        """
+        """ Add product in to cart or update quantity. """
         if product_id not in self.cart:
             self.cart[product_id] = {'quantity': quantity,
                                      'price': str(price)}
@@ -28,7 +25,7 @@ class Cart(object):
         self.save()
 
     def update_quantity(self, product_id, quantity):
-        """Update quantity product in cart."""
+        """ Replace product quantity and price in a cart. """
         if product_id in self.cart:
             self.cart[product_id]['quantity'] = quantity
             self.cart[product_id]['products_price'] = \
@@ -36,26 +33,20 @@ class Cart(object):
             self.save()
 
     def save(self):
-        # Обновление сессии cart
+        """ Update session. """
         self.session[settings.CART_SESSION_ID] = self.cart
-        # Отметить сеанс как "измененный", чтобы убедиться, что он сохранен
         self.session.modified = True
 
     def remove(self, pk):
-        """
-        Удаление товара из корзины.
-        """
+        """ Remove product from a cart. """
         product_id = str(pk)
         if product_id in self.cart:
             del self.cart[product_id]
             self.save()
 
     def __iter__(self):
-        """
-        Перебор элементов в корзине и получение продуктов из базы данных.
-        """
+        """ Iterating through the items in the cart and getting the products from the db. """
         product_ids = self.cart.keys()
-        # получение объектов product и добавление их в корзину
         products = Product.objects.filter(id__in=product_ids).only('name', 'id')
         for product in products:
             self.cart[str(product.id)]['product'] = product.name
@@ -65,19 +56,15 @@ class Cart(object):
             yield item
 
     def __len__(self):
-        """
-        Подсчет всех товаров в корзине.
-        """
+        """ All product in a cart. """
         return sum(item['quantity'] for item in self.cart.values())
 
     def get_total_price(self):
-        """
-        Подсчет стоимости товаров в корзине.
-        """
+        """ Total cost all products in a cart. """
         return sum(Decimal(item['price']) * item['quantity'] for item in
                    self.cart.values())
 
     def clear(self):
-        # удаление корзины из сессии
+        """ Remove cart from a session. """
         del self.session[settings.CART_SESSION_ID]
         self.session.modified = True

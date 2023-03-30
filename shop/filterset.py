@@ -1,3 +1,5 @@
+""" app.shop filter set. """
+
 from django_filters.widgets import LinkWidget
 from django import forms
 from django.db.models import Q
@@ -7,7 +9,7 @@ from shop.models import Category, Product
 
 
 class ProductFilter(filters.FilterSet):
-    """Filterset product."""
+    """ Filter set for product. """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,12 +33,11 @@ class ProductFilter(filters.FilterSet):
                                      label='in stock',
                                      )
 
+    def get_min_price(self, value):
+        return self.queryset.filter(price__gte=value).exclude(new_price__lt=value)
 
-    def get_min_price(self, queryset, name, value):
-        return queryset.filter(price__gte=value).exclude(new_price__lt=value)
-
-    def get_max_price(self, queryset, name, value):
-        return queryset.filter(Q(price__lte=value) | Q(new_price__lte=value))
+    def get_max_price(self, value):
+        return self.queryset.filter(Q(price__lte=value) | Q(new_price__lte=value))
 
     class Meta:
         model = Product

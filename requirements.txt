@@ -35,7 +35,7 @@ dockerpty==0.4.1
 docopt==0.6.2
 flower==1.2.0
 fonttools==4.38.0
-fpdf2==2.6.0
+fpdf2==2.6.1
 humanize==4.4.0
 idna==3.4
 importlib-metadata==5.0.0
@@ -78,3 +78,5 @@ wrapt==1.14.1
 yarg==0.1.9
 yookassa==2.3.3
 zipp==3.10.0
+
+django-debug-toolbar~=3.8.1

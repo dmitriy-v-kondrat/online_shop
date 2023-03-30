@@ -1,18 +1,13 @@
+""" app.cart Serializers. """
+
 from rest_framework import serializers
 
 from cart.cart import Cart
 from users.models import BuyerPaymentPending
 
 
-class AddToCartSerializer(serializers.Serializer):
-    quantity = serializers.IntegerField(initial=1, min_value=1)
-
-    class Meta:
-        model = Cart
-        fields = ('quantity',)
-
-
-class CartUpdateQuantitySerializer(serializers.Serializer):
+class QuantitySerializer(serializers.Serializer):
+    """ Processing one field 'quantity'. """
     quantity = serializers.IntegerField(initial=1, min_value=1)
 
     class Meta:
@@ -21,6 +16,7 @@ class CartUpdateQuantitySerializer(serializers.Serializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+    """ Serializer for PaymentView. """
     receive_newsletter = serializers.BooleanField(initial=True, help_text='receive newsletter new product and discount')
 
     class Meta:

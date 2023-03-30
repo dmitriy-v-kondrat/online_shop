@@ -1,3 +1,5 @@
+""" app.cart urls. """
+
 from django.urls import path
 
 from cart.views import (CartDestroyProductView,

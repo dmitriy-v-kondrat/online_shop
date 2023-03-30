@@ -1,10 +1,11 @@
+""" app.shop views. """
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status
 from rest_framework.response import Response
 
 from cart.cart import Cart
-from cart.serializers import AddToCartSerializer
+from cart.serializers import QuantitySerializer
 from shop.filterset import ProductFilter
 from shop.models import Category, Product
 from shop.serializers import ProductDetailSerializer, ProductListSerializer
@@ -14,6 +15,7 @@ from shop.services import add_cart
 
 
 class ProductListView(generics.ListAPIView):
+    """ Products list. """
     queryset = Product.objects.select_related('category').prefetch_related('images')
     serializer_class = ProductListSerializer
     filter_backends = [DjangoFilterBackend]
@@ -21,24 +23,25 @@ class ProductListView(generics.ListAPIView):
 
 
 class ProductDetailView(generics.RetrieveAPIView, generics.CreateAPIView):
+    """ Product detail. """
     queryset = Product.objects.all()
     lookup_field = 'slug'
 
     def get_serializer_class(self):
+        """ Choice serializer. """
         dict_method = {
-            'POST': AddToCartSerializer,
+            'POST': QuantitySerializer,
             'GET': ProductDetailSerializer
             }
         return dict_method[self.request.method]
 
     def post(self, request, *args, **kwargs):
-        """ Add to cart. """
-        serializer = AddToCartSerializer(data=request.data)
+        """ Adds product to cart. Takes quantity from POST request."""
+        serializer = QuantitySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        cart = Cart(request)
         product = self.get_object()
         quantity = int(serializer.validated_data['quantity'])
-        return_response = add_cart(cart=cart, product=product, quantity=quantity)
+        return_response = add_cart(request, product=product, quantity=quantity)
         dict_response = {
             None: Response(data=f"{product} add to cart", status=status.HTTP_201_CREATED),
             'not found': Response(data=f"Product {product} not found.", status=status.HTTP_404_NOT_FOUND),

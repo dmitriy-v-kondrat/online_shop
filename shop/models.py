@@ -1,3 +1,5 @@
+""" app.shop models. """
+
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.urls import reverse
@@ -13,6 +15,7 @@ class Category(MPTTModel):
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
 
     class MPTTMeta:
+        """ Meta MPTT model. """
         order_insertion_by = ['name']
 
     class Meta:
@@ -23,7 +26,7 @@ class Category(MPTTModel):
 
 
 class Product(models.Model):
-    """Product model."""
+    """ Product model. """
     name = models.CharField(max_length=128, verbose_name='product')
     slug = models.SlugField(max_length=128, unique=True, verbose_name='URL')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='product')
@@ -47,6 +50,7 @@ class Product(models.Model):
 
 
 def path_to_images(instance, filename):
+    """ Path for save images. """
     return 'images/{0}/{1}/{2}'.format(instance.product.category, instance.product.slug, filename)
 
 
@@ -61,5 +65,3 @@ class ImagesProduct(models.Model):
     class Meta:
         verbose_name_plural = 'images'
         ordering = ('product',)
-
-
