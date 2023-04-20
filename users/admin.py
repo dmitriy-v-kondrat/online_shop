@@ -17,7 +17,7 @@ class BuyersAdmin(admin.ModelAdmin):
 
     def purchases_and_delivery(self, obj):
         """ For processing JSON fields. """
-        return purchases_and_delivery(self)
+        return purchases_and_delivery(obj)
 
     show_full_result_count = False
 

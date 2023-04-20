@@ -1,18 +1,16 @@
 """ app.shop views. """
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from cart.cart import Cart
 from cart.serializers import QuantitySerializer
 from shop.filterset import ProductFilter
 from shop.models import Category, Product
 from shop.serializers import ProductDetailSerializer, ProductListSerializer
 from shop.services import add_cart
 
-# Create your views here
 
+# Create your views here
 
 class ProductListView(generics.ListAPIView):
     """ Products list. """
