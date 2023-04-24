@@ -2,7 +2,18 @@
 
 from rest_framework import serializers
 
-from shop.models import ImagesProduct, Product
+from rest_framework_recursive.fields import RecursiveField
+
+from shop.models import Category, ImagesProduct, Product
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    """ Serializer Category model."""
+    detail = serializers.HyperlinkedIdentityField(view_name='detail_category', lookup_field='slug', read_only=True)
+    children = serializers.ListField(read_only=True, source='get_children', child=RecursiveField())
+    class Meta:
+        model = Category
+        fields = ('name', 'detail', 'children')
 
 
 class ImagesSerializer(serializers.ModelSerializer):
@@ -63,3 +74,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             rep['old_price'] = rep['price']
             rep.pop('price')
         return rep
+
+
+class CategoryDetailSerializer(serializers.ModelSerializer):
+    """ Category with products. """
+    product = ProductListSerializer(many=True)
+    children = CategorySerializer(read_only=True, many=True)
+    class Meta:
+        model = Category
+        fields = ('name', 'children', 'product')

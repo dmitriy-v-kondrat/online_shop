@@ -26,7 +26,6 @@ django-js-asset==2.0.0
 django-mptt==0.14.0
 django-phonenumber-field==7.0.0
 django-timezone-field==5.0
-django_debug_toolbar==3.8.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 docker==6.0.1
@@ -80,3 +79,4 @@ yookassa==2.3.3
 zipp==3.10.0
 
 django-debug-toolbar~=3.8.1
+djangorestframework-recursive~=0.1.2

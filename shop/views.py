@@ -6,11 +6,25 @@ from rest_framework.response import Response
 from cart.serializers import QuantitySerializer
 from shop.filterset import ProductFilter
 from shop.models import Category, Product
-from shop.serializers import ProductDetailSerializer, ProductListSerializer
+from shop.serializers import CategoryDetailSerializer, CategorySerializer, ProductDetailSerializer, \
+    ProductListSerializer
 from shop.services import add_cart
 
 
 # Create your views here
+
+class CategoryListView(generics.ListAPIView):
+    """ Category list. """
+    queryset = Category.objects.filter(level=0)
+    serializer_class = CategorySerializer
+
+
+class CategoryDetailView(generics.RetrieveAPIView):
+    """ Category detail. """
+    queryset = Category.objects.all()
+    lookup_field = 'slug'
+    serializer_class = CategoryDetailSerializer
+
 
 class ProductListView(generics.ListAPIView):
     """ Products list. """
