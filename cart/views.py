@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from cart.cart import Cart
 from cart.serializers import PaymentSerializer, QuantitySerializer
 from cart.services import data_for_buyers, data_payment_pending, payment_detail, update_quantity_cart
-from users.models import Buyers
+from users.models import Buyer
 
 
 class CartDetailAPI(APIView):
@@ -66,7 +66,7 @@ class ClearCartView(APIView):
 
 class PaymentView(mixins.CreateModelMixin, generics.GenericAPIView):
     """ Takes buyer data for pay. """
-    queryset = Buyers.objects.all()
+    queryset = Buyer.objects.all()
     serializer_class = PaymentSerializer
 
     def post(self, request, *args, **kwargs):

@@ -56,8 +56,8 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'profiles'
 
 
-class Buyers(models.Model):
-    """ Model creating after succeeded pay. """
+class Buyer(models.Model):
+    """ Model after succeeded pay. """
     email = models.EmailField()
     purchases = models.JSONField(default=dict)
     delivery_data = models.JSONField(default=dict, verbose_name='phone, name, address')

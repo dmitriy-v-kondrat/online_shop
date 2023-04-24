@@ -7,7 +7,7 @@ from datetime import timedelta
 
 from celery import shared_task
 
-from users.models import Buyers, BuyerPaymentPending
+from users.models import Buyer, BuyerPaymentPending
 
 
 @shared_task
@@ -18,8 +18,8 @@ def create_buyer(data_payment_for_model: Dict, total_price: int) -> bool:
     created_at = data_payment_for_model.pop('created_at')
     captured_at = data_payment_for_model.pop('captured_at')
     email = data_payment_for_model.pop('email')
-    if Buyers.objects.filter(email=email).exists():
-        buyer = Buyers.objects.get(email=email)
+    if Buyer.objects.filter(email=email).exists():
+        buyer = Buyer.objects.get(email=email)
         buyer.purchases[purchases] = {'created_at': created_at, 'captured_at': captured_at,
                                       'payment_status': data_payment_for_model.pop('payment_status'),
                                       'products': products,
@@ -29,7 +29,7 @@ def create_buyer(data_payment_for_model: Dict, total_price: int) -> bool:
         buyer.save()
         return True
     else:
-        Buyers.objects.create(email=email,
+        Buyer.objects.create(email=email,
                               purchases={purchases: {'created_at': created_at, 'captured_at': captured_at,
                                                      'payment_status': data_payment_for_model.pop('payment_status'),
                                                      'products': products,
