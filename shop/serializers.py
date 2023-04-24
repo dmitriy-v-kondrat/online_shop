@@ -78,8 +78,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 class CategoryDetailSerializer(serializers.ModelSerializer):
     """ Category with products. """
+    parent = serializers.HyperlinkedRelatedField(view_name='detail_category', lookup_field='slug', read_only=True)
     product = ProductListSerializer(many=True)
     children = CategorySerializer(read_only=True, many=True)
     class Meta:
         model = Category
-        fields = ('name', 'children', 'product')
+        fields = ('parent', 'name', 'children', 'product')
