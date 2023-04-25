@@ -27,6 +27,7 @@ to the newsletter and paid for the order.
 ##### Django
 ##### DjangoRestFramework
 ##### Celery
+##### Flower
 ##### Redis
 ##### Docker
 ##### PostgreSQL
