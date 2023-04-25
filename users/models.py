@@ -36,7 +36,7 @@ class ProfileManager(BaseUserManager):
 
 
 class Profile(AbstractBaseUser, PermissionsMixin):
-    """ Temporarily not connected """
+    """ For further expansion of the project. Maybe """
     username = None
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=100)
@@ -84,4 +84,3 @@ class BuyerPaymentPending(models.Model):
 
     def __str__(self):
         return self.payment_id
-
