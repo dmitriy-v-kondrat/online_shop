@@ -23,16 +23,10 @@ to the newsletter and paid for the order.
 
 # Requirements
 
-Python
-
-Django
-
-DjangoRestFramework
-
-Celery
-
-Redis
-
-Docker
-
-PostgreSQL
+###### Python
+###### Django
+###### DjangoRestFramework
+###### Celery
+###### Redis
+###### Docker
+###### PostgreSQL
