@@ -23,6 +23,7 @@ class BuyersAdmin(admin.ModelAdmin):
 
 
 class BuyerPaymentPendingAdmin(admin.ModelAdmin):
+    """ BuyerPaymentPending. """
     model = BuyerPaymentPending
     list_display = ('created_at', 'payment_status')
     fields = ('payment_id', 'created_at',

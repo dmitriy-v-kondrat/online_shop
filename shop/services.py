@@ -10,11 +10,6 @@ def new_price(price: int, discount: int) -> Decimal:
     return price * (1 - Decimal(discount) / 100)
 
 
-# def _quantity_product(product_quantity: int, quantity: int) -> bool:
-#     if 0 < product_quantity >= quantity:
-#         return True
-
-
 def add_cart(request, product, quantity):
     """ Add to cart. """
     cart = Cart(request)

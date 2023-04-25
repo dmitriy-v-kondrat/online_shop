@@ -93,7 +93,7 @@ class AddToBuyerPaymentPending(ForBuyersBase):
     """ Formation data payment and buyer for after write db. """
 
     def data_for_buyer_payment_pending(self) -> None:
-        """ Data for creating BuyerPaymentPending model. """
+        """ Data to create an instance of the BuyerPaymentPending model. """
         data_for_payment = self.data_payment()
         data_payment = {'payment_id': data_for_payment.id,
                         'orders_pending': data_for_payment.metadata,
